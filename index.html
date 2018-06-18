@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <link rel="stylesheet" href="laymd.css">
+</head>
+<body style="padding: 15px;">
+<div>
+    <div id="demo"></div>
+</div>
+</body>
+<script src="layui/layui.js"></script>
+<script src="laymd/Parser.js"></script>
+<script>
+    layui.use(['layer', 'laymd'], function(){
+        var $ = layui.$,
+            layer = layui.layer,
+            laymd = layui.laymd;
+
+        var parser = new HyperDown;
+
+        var md = laymd.init('demo', {});
+
+        md.on('change', function () {
+            $('iframe').contents().find('body').html(parser.makeHtml(md.getText()));
+        });
+    });
+</script>
+</html>
