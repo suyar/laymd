@@ -20,7 +20,7 @@ layui.define(['jquery'], function(exports) {
                 '|',
                 'table', 'quote', 'toc', 'img',
                 '|',
-                'full'
+                'full', 'preview'
             ],
             height: 280
         };
@@ -51,8 +51,16 @@ layui.define(['jquery'], function(exports) {
         ].join(''));
 
         //设置编辑框和预览框
-        EL.$textArea = EL.$div.find('textarea').css('height', config.height).attr('name', EL.$div.attr('name') || EL.$div.prop('id'));
-        EL.$iframe = EL.$div.find('iframe').css('height', config.height);
+        EL.$div.find('.layui-laymd-area').height(config.height);
+        EL.$textArea = EL.$div.find('textarea').attr('name', EL.$div.attr('name') || EL.$div.prop('id'));
+        EL.$iframe = EL.$div.find('iframe');
+
+        //设置预览默认样式
+        EL.$iframe.contents().find('head').append([
+            '<style>',
+            '',
+            '</style>'
+        ].join(''));
 
         //获取DOM
         var textArea = EL.$textArea[0];
@@ -275,6 +283,29 @@ layui.define(['jquery'], function(exports) {
         this.getText = function () {
             return textArea.value;
         };
+
+        //设置预览HTML
+        this.setPreview = function (html) {
+            EL.$iframe.contents().find('body').html(html);
+        };
+
+        //设置超链接
+        this.setLink = function (link, text, title) {
+            actions.link.call(THIS, null, null, EL, {
+                link: link,
+                text: text,
+                title: title
+            });
+        };
+
+        //设置图片
+        this.setImg = function (src, alt, title) {
+            actions.img.call(THIS, null, null, EL, {
+                src: src,
+                alt: alt,
+                title: title
+            });
+        };
     };
 
     //所有工具
@@ -303,7 +334,8 @@ layui.define(['jquery'], function(exports) {
         center: '<i class="laymd-tool-center" title="居中" laymd-event="center">C</i>',
         right: '<i class="laymd-tool-right" title="居右" laymd-event="right">R</i>',
         img: '<i class="laymd-tool-img" title="图片" laymd-event="img">IMG</i>',
-        full: '<i class="laymd-tool-full" title="全屏" laymd-event="full">↗</i>'
+        full: '<i class="laymd-tool-full" title="全屏" laymd-event="full">↗</i>',
+        preview: '<i class="laymd-tool-preview" title="预览" laymd-event="preview">√</i>'
     };
 
     //热键数组
@@ -531,9 +563,20 @@ layui.define(['jquery'], function(exports) {
             if (EL.$div.hasClass('layui-laymd-full')) {
                 EL.$div.removeClass('layui-laymd-full');
                 element && $(element).text('↗');
+                EL.$div.find('i.laymd-tool-preview').show();
             } else {
                 EL.$div.addClass('layui-laymd-full');
                 element && $(element).text('↙');
+                EL.$div.find('i.laymd-tool-preview').hide();
+            }
+        },
+        preview: function (event, element, EL, params) {
+            if (EL.$iframe.is(':visible')) {
+                EL.$iframe.hide();
+                element && $(element).removeClass('select');
+            } else {
+                EL.$iframe.show();
+                element && $(element).addClass('select');
             }
         }
     };

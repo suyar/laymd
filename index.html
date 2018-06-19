@@ -8,11 +8,61 @@
 </head>
 <body style="padding: 15px;">
 <div>
-    <div id="demo"></div>
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">长输入框</label>
+            <div class="layui-input-block">
+                <input type="text" name="title" autocomplete="off" placeholder="请输入标题" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">短输入框</label>
+            <div class="layui-input-inline">
+                <input type="text" name="username" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">日期选择</label>
+                <div class="layui-input-block">
+                    <input type="text" name="date" id="date1" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">行内表单</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="number" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-inline">
+                <input type="password" name="password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">请务必填写用户名</div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">文本域</label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item" pane="">
+            <div id="demo"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <button class="layui-btn" lay-submit="" lay-filter="demo2">跳转式提交</button>
+        </div>
+    </form>
 </div>
 </body>
 <script src="layui/layui.js"></script>
-<script src="laymd/Parser.js"></script>
+<script src="Parser.js"></script>
 <script>
     layui.use(['layer', 'laymd'], function(){
         var $ = layui.$,
@@ -24,7 +74,7 @@
         var md = laymd.init('demo', {});
 
         md.on('change', function () {
-            $('iframe').contents().find('body').html(parser.makeHtml(md.getText()));
+            this.setPreview(parser.makeHtml(md.getText()));
         });
     });
 </script>
