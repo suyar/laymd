@@ -112,14 +112,11 @@ layui.define(['jquery'], function(exports) {
 
         //滚动事件
         EL.$textArea.scroll(function () {
-            console.log(EL.$iframe.contents().find('body').get(0).scrollHeight, this.scrollHeight);
-
-            var p = EL.$iframe.contents().find('body').get(0).scrollHeight / this.scrollHeight;
-
-            //console.log(this.scrollTop, p, this.scrollTop * p);
-
-            EL.$iframe[0].contentWindow.scroll(0, this.scrollTop * p);
-
+            var ifrBody = EL.$iframe.contents().find('body')[0];
+            if (ifrBody.scrollHeight > EL.$iframe.height()) {
+                var p = (ifrBody.scrollHeight - EL.$iframe.height()) / (textArea.scrollHeight - EL.$textArea.outerHeight());
+                EL.$iframe[0].contentWindow.scroll(0, this.scrollTop * p);
+            }
         });
 
         //输入法输入事件
