@@ -2,7 +2,26 @@ layui.define(['jquery'], function(exports) {
     "use strict";
 
     var $ = layui.$,
-        MOD_NAME = 'laymd';
+        MOD_NAME = 'laymd',
+        JS_PATH;
+
+    //获取JS所在路径
+    if (document.currentScript) {
+        JS_PATH = document.currentScript.src;
+    } else {
+        var js = document.scripts, last = js.length - 1, src;
+        for(var i = last; i > 0; i--){
+            if(js[i].readyState === 'interactive'){
+                src = js[i].src;
+                break;
+            }
+        }
+        JS_PATH = src || js[last].src;
+    }
+    JS_PATH = JS_PATH.substring(0, JS_PATH.lastIndexOf('/') + 1);
+
+    //加载CSS
+    layui.link(JS_PATH + 'laymd.css');
 
     //实例化
     var MD = function (id, options) {
@@ -34,6 +53,9 @@ layui.define(['jquery'], function(exports) {
         //获取编辑器容器
         EL.$div = $(typeof(id) === 'string' ? '#' + id : id).addClass('layui-laymd');
 
+        //获取默认值
+        var initValue = EL.$div.text();
+
         //设置要显示的工具
         var toolBar = [];
         layui.each(config.tools, function(index, item){
@@ -52,15 +74,11 @@ layui.define(['jquery'], function(exports) {
 
         //设置编辑框和预览框
         EL.$div.find('.layui-laymd-area').height(config.height);
-        EL.$textArea = EL.$div.find('textarea').attr('name', EL.$div.attr('name') || EL.$div.prop('id'));
+        EL.$textArea = EL.$div.find('textarea').attr('name', EL.$div.attr('name') || EL.$div.prop('id')).val(initValue);
         EL.$iframe = EL.$div.find('iframe');
 
         //设置预览默认样式
-        EL.$iframe.contents().find('head').append([
-            '<style>',
-            '',
-            '</style>'
-        ].join(''));
+        EL.$iframe.contents().find('head').append('<link rel="stylesheet" href="' + JS_PATH + 'preview.css' + '">');
 
         //获取DOM
         var textArea = EL.$textArea[0];
@@ -92,6 +110,18 @@ layui.define(['jquery'], function(exports) {
             }
         });
 
+        //滚动事件
+        EL.$textArea.scroll(function () {
+            console.log(EL.$iframe.contents().find('body').get(0).scrollHeight, this.scrollHeight);
+
+            var p = EL.$iframe.contents().find('body').get(0).scrollHeight / this.scrollHeight;
+
+            //console.log(this.scrollTop, p, this.scrollTop * p);
+
+            EL.$iframe[0].contentWindow.scroll(0, this.scrollTop * p);
+
+        });
+
         //输入法输入事件
         var composition = false, preText, sufText;
         EL.$textArea.on('input', function (e) {
@@ -115,6 +145,11 @@ layui.define(['jquery'], function(exports) {
         //事件绑定
         this.on = function (event, callback) {
             layui.onevent.call(this, MOD_NAME, MOD_NAME + '(' + event + ')', callback);
+        };
+
+        //执行某个动作
+        this.do = function (action, event, element, params) {
+            actions[action] && actions[action].call(THIS, event, element, EL, params);
         };
 
         //定时存储操作记录

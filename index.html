@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="layui/css/layui.css">
-    <link rel="stylesheet" href="laymd.css">
 </head>
 <body style="padding: 15px;">
 <div>
@@ -52,7 +51,7 @@
         </div>
 
         <div class="layui-form-item" pane="">
-            <div id="demo"></div>
+            <div id="demo" class="layui-laymd-full"># This id H1</div>
         </div>
 
         <div class="layui-form-item">
@@ -62,20 +61,26 @@
 </div>
 </body>
 <script src="layui/layui.js"></script>
-<script src="Parser.js"></script>
+<script src="laymd/Parser.js"></script>
 <script>
-    layui.use(['layer', 'laymd'], function(){
+    layui.config({base: 'laymd/'}).use(['layer', 'laymd'], function(){
         var $ = layui.$,
             layer = layui.layer,
             laymd = layui.laymd;
 
+        //实例化解析器,这里不限定用哪种
         var parser = new HyperDown;
 
+        //实例化编辑器,可以多个实例
         var md = laymd.init('demo', {});
 
+        //内容改变事件
         md.on('change', function () {
-            this.setPreview(parser.makeHtml(md.getText()));
+            this.setPreview(parser.makeHtml(this.getText()));
         });
+
+        //初始化数据预览
+        md.do('change');
     });
 </script>
 </html>
