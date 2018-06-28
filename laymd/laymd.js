@@ -73,6 +73,7 @@ layui.define(['jquery'], function(exports) {
         ].join(''));
 
         //设置编辑框和预览框
+        EL.$body = $('body');
         EL.$div.find('.layui-laymd-area').height(config.height);
         EL.$textArea = EL.$div.find('textarea').attr('name', EL.$div.attr('name') || EL.$div.prop('id')).val(initValue);
         EL.$iframe = EL.$div.find('iframe');
@@ -596,10 +597,12 @@ layui.define(['jquery'], function(exports) {
                 EL.$div.removeClass('layui-laymd-full');
                 element && $(element).text('↗');
                 EL.$div.find('i.laymd-tool-preview').show();
+                EL.$body.removeAttr('style');
             } else {
                 EL.$div.addClass('layui-laymd-full');
                 element && $(element).text('↙');
                 EL.$div.find('i.laymd-tool-preview').hide();
+                EL.$body.attr('style', 'overflow: hidden;');
             }
         },
         preview: function (event, element, EL, params) {
