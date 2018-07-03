@@ -1,57 +1,59 @@
-layui.define(['jquery'], function(exports) {
+(function(root,factroy){
+    var MOD_NAME = 'laymd';
+    typeof root.layui === 'object' && layui.define ? layui.define('jquery',function(mods){mods(MOD_NAME,factroy(layui.jquery,MOD_NAME))}) :
+    null;
+}(this,function($,MOD_NAME){
     "use strict";
 
-    var $ = layui.$,
-        MOD_NAME = 'laymd',
-        JS_PATH;
+    //默认配置项
+    var config = {
+        tools: [
+            'bold', 'italic', 'underline', 'del',
+            // '|',
+            // 'left', 'center', 'right',
+            '|',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            '|',
+            'hr', 'link', 'code', 'ol', 'ul', 'tl',
+            '|',
+            'table', 'quote', 'toc', 'img',
+            '|',
+            'full', 'preview'
+        ],
+        height: 280,
+        width:'100%',
+        viewcss:'preview.css',
+        editcss:'laymd.css',
+        bottom:0,
+        name:MOD_NAME + '_content',
+        verify:'',
+        base:''
+    };
 
-    //获取JS所在路径
-    if (document.currentScript) {
-        JS_PATH = document.currentScript.src;
-    } else {
-        var js = document.scripts, last = js.length - 1, src;
-        for(var i = last; i > 0; i--){
-            if(js[i].readyState === 'interactive'){
-                src = js[i].src;
-                break;
-            }
-        }
-        JS_PATH = src || js[last].src;
-    }
-    JS_PATH = JS_PATH.substring(0, JS_PATH.lastIndexOf('/') + 1);
-
-    //加载CSS
-    layui.link(JS_PATH + 'laymd.css');
+    // js路径
+    var JS_PATH = layui.cache.modules[MOD_NAME];
+    JS_PATH = JS_PATH.substring(0,JS_PATH.lastIndexOf('/')+1);
 
     //实例化
-    var MD = function (id, options) {
-
-        //默认配置项
-        var config = {
-            tools: [
-                'bold', 'italic', 'underline', 'del',
-                '|',
-                'left', 'center', 'right',
-                '|',
-                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-                '|',
-                'hr', 'link', 'code', 'ol', 'ul', 'tl',
-                '|',
-                'table', 'quote', 'toc', 'img',
-                '|',
-                'full', 'preview'
-            ],
-            height: 280
-        };
-
+    var MD = function (jqselect, options) {
         //合并配置项
         config = $.extend({}, config, options);
+
+        //加载CSS
+        layui.link(JS_PATH + config.base + config.editcss);
 
         //相关元素
         var EL = {}, THIS = this;
 
+        // 处理css文件
+        EL.viewcss = '<link rel="stylesheet" href="' + JS_PATH + config.base + config.viewcss + '">'
+
+        // 占位class
+        this.zw_class = null;
+
         //获取编辑器容器
-        EL.$div = $(typeof(id) === 'string' ? '#' + id : id).addClass('layui-laymd');
+        EL.$div = $(jqselect).addClass('layui-laymd');
+        EL.$div.css({width:config.width,margin:'0 auto',marginBottom:config.bottom});
 
         //获取默认值
         var initValue = EL.$div.text();
@@ -75,11 +77,11 @@ layui.define(['jquery'], function(exports) {
         //设置编辑框和预览框
         EL.$body = $('body');
         EL.$div.find('.layui-laymd-area').height(config.height);
-        EL.$textArea = EL.$div.find('textarea').attr('name', EL.$div.attr('name') || EL.$div.prop('id')).val(initValue);
+        EL.$textArea = EL.$div.find('textarea').attr({name:config.name,'lay-verify':config.verify}).val(initValue);
         EL.$iframe = EL.$div.find('iframe');
 
         //设置预览默认样式
-        EL.$iframe.contents().find('head').append('<link rel="stylesheet" href="' + JS_PATH + 'preview.css' + '">');
+        EL.$iframe.contents().find('head').append(EL.viewcss);
 
         //获取DOM
         var textArea = EL.$textArea[0];
@@ -317,6 +319,12 @@ layui.define(['jquery'], function(exports) {
             return textArea.value;
         };
 
+        // 设置编辑器的文本
+        this.setText = function(md){
+            $(textArea).val(md);
+            THIS.do('change');
+        }
+
         //设置预览HTML
         this.setPreview = function (html) {
             EL.$iframe.contents().find('body').html(html);
@@ -363,9 +371,9 @@ layui.define(['jquery'], function(exports) {
         table: '<i class="laymd-tool-table" title="表格" laymd-event="table">T</i>',
         quote: '<i class="laymd-tool-quote" title="引用" laymd-event="quote">Q</i>',
         toc: '<i class="laymd-tool-toc" title="导航" laymd-event="toc">TOC</i>',
-        left: '<i class="laymd-tool-left" title="居左" laymd-event="left">L</i>',
-        center: '<i class="laymd-tool-center" title="居中" laymd-event="center">C</i>',
-        right: '<i class="laymd-tool-right" title="居右" laymd-event="right">R</i>',
+        // left: '<i class="laymd-tool-left" title="居左" laymd-event="left">L</i>',
+        // center: '<i class="laymd-tool-center" title="居中" laymd-event="center">C</i>',
+        // right: '<i class="laymd-tool-right" title="居右" laymd-event="right">R</i>',
         img: '<i class="laymd-tool-img" title="图片" laymd-event="img">IMG</i>',
         full: '<i class="laymd-tool-full" title="全屏" laymd-event="full">↗</i>',
         preview: '<i class="laymd-tool-preview" title="预览" laymd-event="preview">√</i>'
@@ -427,15 +435,15 @@ layui.define(['jquery'], function(exports) {
                 end: range.end + 2
             });
         },
-        left: function (event, element, EL, params) {
-            this.setLineText(this.getLineText().replace(/^ *(:-:|--:) /, ''));
-        },
-        center: function (event, element, EL, params) {
-            this.setLineText(':-: ' + this.getLineText().replace(/ *(^:-:|--:) /, ''));
-        },
-        right: function (event, element, EL, params) {
-            this.setLineText('--: ' + this.getLineText().replace(/^ *(:-:|--:) /, ''));
-        },
+        // left: function (event, element, EL, params) {
+        //     this.setLineText(this.getLineText().replace(/^ *(:-:|--:) /, ''));
+        // },
+        // center: function (event, element, EL, params) {
+        //     this.setLineText(':-: ' + this.getLineText().replace(/ *(^:-:|--:) /, ''));
+        // },
+        // right: function (event, element, EL, params) {
+        //     this.setLineText('--: ' + this.getLineText().replace(/^ *(:-:|--:) /, ''));
+        // },
         h1: function (event, element, EL, params) {
             this.setLineText('# ' + this.getLineText().replace(/^ *#+ /, ''));
         },
@@ -478,7 +486,8 @@ layui.define(['jquery'], function(exports) {
                     text = textLen ? range.text : 'text',
                     title = textLen ? range.text : 'title';
                 this.setRangeData({
-                    text: '[' + text + '](http://link-address "' + title + '")',
+                    // text: '[' + text + '](http://link-address "' + title + '")',
+                    text: '[' + text + '](http://link-address)',
                     start: textLen ? (range.start + textLen + 3) : (range.start + 1),
                     end: textLen ? (range.start + textLen + 22) : (range.start + 5),
                 });
@@ -511,6 +520,7 @@ layui.define(['jquery'], function(exports) {
             this.setLineText(this.getLineText().replace(/^( *)(?:(?:(?:\d+\.)|(?:-(?: \[[ x]])?)) )?(.*)/, '$1- [ ] $2'));
         },
         enter: function (event, element, EL, params) {
+            debugger;
             var line = this.getLineData(),
                 preLine = this.getLineData(line.line - 1);
             var match = /^( *)((?:(?:\d+\.)|(?:-(?: \[[ x]])?)) )?(.*)/.exec(preLine.text);
@@ -569,7 +579,8 @@ layui.define(['jquery'], function(exports) {
                     alt = textLen ? range.text : 'alt',
                     title = textLen ? range.text : 'title';
                 this.setRangeData({
-                    text: '![' + alt + '](http://link-address "' + title + '")',
+                    // text: '![' + alt + '](http://link-address "' + title + '")',
+                    text: '![' + alt + '](http://link-address)',
                     start: textLen ? (range.start + textLen + 4) : (range.start + 2),
                     end: textLen ? (range.start + textLen + 23) : (range.start + 5),
                 });
@@ -577,7 +588,7 @@ layui.define(['jquery'], function(exports) {
         },
         tab: function (event, element, EL, params) {
             var range = this.getRangeData();
-            this.setRangeData({text: '    ', start: range.start + 4, end: range.start + 4});
+            this.setRangeData({text: '\t', start: range.start + 4, end: range.start + 1});
         },
         input: function (event, element, EL, params) {
             this.history.redo(true);
@@ -598,11 +609,27 @@ layui.define(['jquery'], function(exports) {
                 element && $(element).text('↗');
                 EL.$div.find('i.laymd-tool-preview').show();
                 EL.$body.removeAttr('style');
+
+                // 回归原位并且移除占位，以及还原css
+                $('.'+this.zw_class).after(EL.$div).remove();
+                EL.$div.css({zIndex:1,width:config.width,marginBottom:config.bottom});
+
+                // 处理iframe产生的bug
+                this.do('change');
+                EL.$iframe.contents().find('head').append(EL.viewcss);
             } else {
                 EL.$div.addClass('layui-laymd-full');
                 element && $(element).text('↙');
                 EL.$div.find('i.laymd-tool-preview').hide();
                 EL.$body.attr('style', 'overflow: hidden;');
+
+                // 占位并且移动到body层,以及调整css
+                this.zw_class = MOD_NAME + (new Date).getTime();
+                EL.$div.css({zIndex:100000,width:'100%',marginBottom:0}).after('<span class="'+this.zw_class+'"></span>').appendTo('body');
+
+                // 处理iframe产生的bug
+                this.do('change');
+                EL.$iframe.contents().find('head').append(EL.viewcss);
             }
         },
         preview: function (event, element, EL, params) {
@@ -616,9 +643,9 @@ layui.define(['jquery'], function(exports) {
         }
     };
 
-    exports(MOD_NAME, {
-        init: function (id, options) {
-            return new MD(id, options);
-        }
-    });
-});
+    var RE = function(jqselect,option){
+        return new MD(jqselect,option);
+    }
+
+    return RE;
+}));

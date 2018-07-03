@@ -5,6 +5,7 @@
 引入解析器（这个看个人喜好，demo用的是marked.js，速度较快，也可以用HyperDown）
 
 ```html
+<div class="laymd-dome"></div>
 <script src="laymd/marked.min.js"></script>
 ```
 
@@ -13,7 +14,8 @@ layui.config({base: 'laymd/'}).use(['laymd'], function(){
     var laymd = layui.laymd;
 
     //实例化编辑器,可以多个实例
-    var md = laymd.init('demo', {});
+    //改用css选择器,去除init冗余
+    var md = laymd('.laymd-dome', {});
 
     //内容改变事件
     md.on('change', function () {
@@ -28,75 +30,113 @@ layui.config({base: 'laymd/'}).use(['laymd'], function(){
 
 [查看示例页面](http://laymd.revoke.cc/?_blank)
 
+### 默认配置
+`laymd.css`和`preview.css`可以随意放置并且变更名称
 
-> 注意，请把`laymd.css`和`preview.css`以及`laymd.js`放在同一个目录下，并且不要变更文件名
+```javascript
+var config = {
+    // 工具栏
+    tools: [
+        'bold', 'italic', 'underline', 'del',
+        // '|',
+        // 'left', 'center', 'right',
+        '|',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        '|',
+        'hr', 'link', 'code', 'ol', 'ul', 'tl',
+        '|',
+        'table', 'quote', 'toc', 'img',
+        '|',
+        'full', 'preview'
+    ],
+    // 高度
+    height: 280,
+    // 宽度
+    width:'100%',
+    // 预览css
+    viewcss:'preview.css',
+    // 编辑器css
+    editcss:'laymd.css',
+    // margin-bottom
+    bottom:0,
+    // textarea的name值
+    name:MOD_NAME + '_content',
+    // layui验证字段
+    verify:'',
+    // 样式文件存放路径，基于layui的base
+    base:''
+};
+```
 
 ### API
 
-- `md.on(event, callback)`
-
-绑定事件，目前仅支持`change`事件
+> `md.on(event, callback)`
+>
+> 绑定事件，目前仅支持`change`事件
 
 ---
 
-- `md.do(action)`
+> `md.do(action)`
+>
+> 执行事件，事件详情请看源码
 
-执行事件，事件详情请看源码
+> `md.history`
+>
+> 撤销：`md.history.undo`
+>
+> 还原：`md.history.redo`
 
-- `md.history`
+> `md.getRangeData()`
+>
+> 获取当前选中的文字以及开始-结束位置`{start: number, end: number, text: string}`
 
-撤销：`md.history.undo`
+> `md.setRangeData(rangeData)`
+>
+> 替换当前选中数据并且设置选中范围的开始-结束位置`{start: number, end: number, text: string}`
 
-还原：`md.history.redo`
+> `md.getRangeText()`
+>
+> 获取选中的文本
 
-- `md.getRangeData()`
+> `md.setRangeText(text)`
+>
+> 替换当前选中的数据
 
-获取当前选中的文字以及开始-结束位置`{start: number, end: number, text: string}`
+> `md.getLineData(line)`
+>
+> 获取当前行的数据，如果有传入`line`则获取第`line`行的数据；如果跨行选中，则以选中最后的位置一行为准 `{start: number, end: number, line: number, text: string}`
 
-- `md.setRangeData(rangeData)`
+> `md.setLineData(lineData)`
+>
+> 设置光标所在行的数据`{start: number, end: number, line: number, text: string}`,如果line存在，表示设置的第`line`行
 
-替换当前选中数据并且设置选中范围的开始-结束位置`{start: number, end: number, text: string}`
+> `md.getLineText(line)`
+>
+> 获取第`line`行的数据，不传为当前行
 
-- `md.getRangeText()`
+> `md.setLineText(text ,line)`
+>
+> 设置第`line`行的数据，不传为当前行
 
-获取选中的文本
+> `md.getText()`
+>
+> 获取当前的MD数据
 
-- `md.setRangeText(text)`
+> `md.setText(mdtext)`
+>
+> 设置当前的md数据
 
-替换当前选中的数据
+> `md.setPreview(html)`
+>
+> 设置预览的HTML
 
-- `md.getLineData(line)`
+> `md.setLink(link, text, title)`
+>
+> 在当前位置添加超链接
 
-获取当前行的数据，如果有传入`line`则获取第`line`行的数据；如果跨行选中，则以选中最后的位置一行为准
-`{start: number, end: number, line: number, text: string}`
-
-- `md.setLineData(lineData)`
-
-设置光标所在行的数据`{start: number, end: number, line: number, text: string}`,如果line存在，表示设置的第`line`行
-
-- `md.getLineText(line)`
-
-获取第`line`行的数据，不传为当前行
-
-- `md.setLineText(text ,line)`
-
-设置第`line`行的数据，不传为当前行
-
-- `md.getText()`
-
-获取当前的MD数据
-
-- `md.setPreview(html)`
-
-设置预览的HTML
-
-- `md.setLink(link, text, title)`
-
-在当前位置添加超链接
-
-- `md.setImg(src, alt, title)`
-
-在当前位置添加图片
+> `md.setImg(src, alt, title)`
+>
+> 在当前位置添加图片
 
 
 ### 快捷键
@@ -122,29 +162,6 @@ keyMap[81] = 'quote'; //ctrl + q
 keyMap[89] = 'redo'; //ctrl + y
 keyMap[90] = 'undo'; //ctrl + z
 ```
-
-### 初始化配置
-
-```javascript
-laymd.init('demo', {
-    tools: [
-        'bold', 'italic', 'underline', 'del',
-        '|',
-        'left', 'center', 'right',
-        '|',
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        '|',
-        'hr', 'link', 'code', 'ol', 'ul', 'tl',
-        '|',
-        'table', 'quote', 'toc', 'img',
-        '|',
-        'full', 'preview'
-    ],
-    height: 280
-});
-```
-
-> 嗯。。。目前就支持这两项配置
 
 > 关于图标问题：因个人偷懒，懒得弄图标，所以将就一下
 
