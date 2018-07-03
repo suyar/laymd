@@ -29,9 +29,9 @@ layui.config({base: 'laymd/'}).use(['laymd'], function(){
 [查看示例页面](http://laymd.revoke.cc/?_blank)
 
 
+### 默认配置
 `laymd.css`和`preview.css`可以随意放置并且变更名称
 
-### 默认配置
 ```javascript
 var config = {
     // 工具栏
