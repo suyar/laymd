@@ -5,6 +5,7 @@
 引入解析器（这个看个人喜好，demo用的是marked.js，速度较快，也可以用HyperDown）
 
 ```html
+<div class="laymd-dome"></div>
 <script src="laymd/marked.min.js"></script>
 ```
 
@@ -13,7 +14,8 @@ layui.config({base: 'laymd/'}).use(['laymd'], function(){
     var laymd = layui.laymd;
 
     //实例化编辑器,可以多个实例
-    var md = laymd('demo', {});
+    //改用css选择器,去除init冗余
+    var md = laymd('.laymd-dome', {});
 
     //内容改变事件
     md.on('change', function () {
@@ -27,7 +29,6 @@ layui.config({base: 'laymd/'}).use(['laymd'], function(){
 ```
 
 [查看示例页面](http://laymd.revoke.cc/?_blank)
-
 
 ### 默认配置
 `laymd.css`和`preview.css`可以随意放置并且变更名称
